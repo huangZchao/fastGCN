@@ -9,6 +9,8 @@ import os
 from utils import *
 from models import GCN_APPRO_Mix
 
+# np.set_printoptions(threshold=np.inf)
+
 # Set random seed
 seed = 123
 np.random.seed(seed)
@@ -51,33 +53,24 @@ def iterate_minibatches_listinputs(inputs, batchsize, shuffle=False):
 
 
 def main(rank1):
-
     adj, features, y_train, y_val, y_test, train_mask, val_mask, test_mask = load_data_original(FLAGS.dataset)
-
     train_index = np.where(train_mask)[0]
     adj_train = adj[train_index, :][:, train_index]
-    train_mask = train_mask[train_index]
     y_train = y_train[train_index]
     val_index = np.where(val_mask)[0]
     y_val = y_val[val_index]
     test_index = np.where(test_mask)[0]
     y_test = y_test[test_index]
+    print("y_train, {}; y_val, {}; y_test, {}".format(len(y_train), len(y_val), len(y_test)))
 
-    train_val_index = np.concatenate([train_index, val_index],axis=0)
-    train_test_idnex = np.concatenate([train_index, test_index],axis=0)
-
-
-    numNode_train = adj_train.shape[0]
-    # print("numNode", numNode)
-
+    train_val_index = np.concatenate([train_index, val_index], axis=0)
+    train_test_idnex = np.concatenate([train_index, test_index], axis=0)
 
     if FLAGS.model == 'gcn_mix':
         normADJ_train = nontuple_preprocess_adj(adj_train)
-        # normADJ = nontuple_preprocess_adj(adj)
-        normADJ_val = nontuple_preprocess_adj(adj[train_val_index,:][:,train_val_index])
-        normADJ_test = nontuple_preprocess_adj(adj[train_test_idnex,:][:,train_test_idnex])
+        normADJ_val = nontuple_preprocess_adj(adj[train_val_index, :][:, train_val_index])
+        normADJ_test = nontuple_preprocess_adj(adj[train_test_idnex, :][:, train_test_idnex])
 
-        num_supports = 2
         model_func = GCN_APPRO_Mix
     else:
         raise ValueError('Invalid argument for model: ' + str(FLAGS.model))
@@ -85,17 +78,13 @@ def main(rank1):
     # Some preprocessing
     features = nontuple_preprocess_features(features).todense()
 
-    train_features = normADJ_train.dot(features[train_index])
+    train_features = normADJ_train.dot(features[train_index])  # A*X
     val_features = normADJ_val.dot(features[train_val_index])
     test_features = normADJ_test.dot(features[train_test_idnex])
 
-    nonzero_feature_number = len(np.nonzero(features)[0])
-    nonzero_feature_number_train = len(np.nonzero(train_features)[0])
-
-
     # Define placeholders
     placeholders = {
-        'support': tf.sparse_placeholder(tf.float32) ,
+        'support': tf.sparse_placeholder(tf.float32),
         'AXfeatures': tf.placeholder(tf.float32, shape=(None, features.shape[1])),
         'labels': tf.placeholder(tf.float32, shape=(None, y_train.shape[1])),
         'dropout': tf.placeholder_with_default(0., shape=()),
@@ -136,7 +125,6 @@ def main(rank1):
         n = 0
         for batch in iterate_minibatches_listinputs([normADJ_train, y_train], batchsize=20, shuffle=True):
             [normADJ_batch, y_train_batch] = batch
-
             if rank1 is None:
                 support1 = sparse_to_tuple(normADJ_batch)
                 features_inputs = train_features
@@ -147,9 +135,8 @@ def main(rank1):
                 else:
                     q1 = np.random.choice(distr, rank1, replace=False, p=p0[distr]/sum(p0[distr]))  # top layer
 
-
                 support1 = sparse_to_tuple(normADJ_batch[:, q1].dot(sp.diags(1.0 / (p0[q1] * rank1))))
-                if len(support1[1])==0:
+                if len(support1[1]) == 0:
                     continue
                 features_inputs = train_features[q1, :]  # selected nodes for approximation
             # Construct feed dictionary

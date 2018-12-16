@@ -129,7 +129,6 @@ class Dense(Layer):
         return self.act(output)
 
 
-
 class GraphConvolution(Layer):
     """Graph convolution layer."""
     def __init__(self, input_dim, output_dim, placeholders, dropout=0.,
@@ -173,17 +172,6 @@ class GraphConvolution(Layer):
         else:
             x = tf.nn.dropout(x, 1-self.dropout)
 
-        # convolve
-        # supports = list()
-        # for i in range(len(self.support)):
-        #     if not self.featureless:
-        #         pre_sup = dot(x, self.vars['weights_' + str(i)],
-        #                       sparse=self.sparse_inputs)
-        #     else:
-        #         pre_sup = self.vars['weights_' + str(i)]
-        #     support = dot(self.support[i], pre_sup, sparse=True)
-        #     supports.append(support)
-        # output = tf.add_n(supports)
         if not self.featureless:
             pre_sup = dot(x, self.vars['weights_0'],
                           sparse=self.sparse_inputs)

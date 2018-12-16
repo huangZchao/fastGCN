@@ -129,8 +129,6 @@ class MLP(Model):
         return tf.nn.softmax(self.outputs)
 
 
-
-
 class GCN(Model):
     def __init__(self, placeholders, input_dim, **kwargs):
         super(GCN, self).__init__(**kwargs)
@@ -177,7 +175,6 @@ class GCN(Model):
 
     def predict(self):
         return tf.nn.softmax(self.outputs)
-
 
 
 class GCN_APPRO(Model):
@@ -250,7 +247,6 @@ class GCN_APPRO_Mix(Model): #mixture of dense and gcn
         # Cross entropy error
         self.loss += softmax_cross_entropy(self.outputs, self.placeholders['labels'])
 
-
     def _accuracy(self):
         self.accuracy = accuracy(self.outputs, self.placeholders['labels'])
 
@@ -273,7 +269,6 @@ class GCN_APPRO_Mix(Model): #mixture of dense and gcn
 
     def predict(self):
         return tf.nn.softmax(self.outputs)
-
 
 
 class GCN_APPRO_Onelayer(Model):

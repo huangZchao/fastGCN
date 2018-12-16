@@ -234,12 +234,10 @@ def normalize_adj(adj):
 
 def nontuple_preprocess_adj(adj):
     adj_normalized = normalize_adj(sp.eye(adj.shape[0]) + adj)
-    # adj_normalized = sp.eye(adj.shape[0]) + normalize_adj(adj)
     return adj_normalized.tocsr()
 
 def column_prop(adj):
     column_norm = sparsenorm(adj, axis=0)
-    # column_norm = pow(sparsenorm(adj, axis=0),2)
     norm_sum = sum(column_norm)
     return column_norm/norm_sum
 

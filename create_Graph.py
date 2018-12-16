@@ -11,7 +11,7 @@ from networkx.readwrite import json_graph
  # 'cora', 'citeseer', 'pubmed'
 
 if __name__=="__main__":
-    data_name = 'cora'
+    data_name = 'pubmed'
     adj, features, y_train, y_val, y_test, train_mask, val_mask, test_mask = load_data(data_name)
 
     G = nx.from_scipy_sparse_matrix(adj)
@@ -35,18 +35,18 @@ if __name__=="__main__":
 
 
     data = json_graph.node_link_data(G)
-    with open("cora/cora-G.json","wb") as f:
+    with open("{}/{}-G.json".format(data_name, data_name), "wb") as f:
         json.dump(data,f)
     classMap = {}
     idMap = {}
     for i in range(len(y)):
         classMap[i]=y[i]
         idMap[i] = i
-    with open("cora/cora-id_map.json","wb") as f:
+    with open("{}/{}-id_map.json".format(data_name, data_name), "wb") as f:
         json.dump(idMap,f)
-    with open("cora/cora-class_map.json","wb") as f:
+    with open("{}/{}-class_map.json".format(data_name, data_name), "wb") as f:
         json.dump(classMap,f)
-    np.save(open("cora/cora-feats.npy","wb"), features.todense())
+    np.save(open("{}/{}-feats.npy".format(data_name, data_name), "wb"), features.todense())
 
 
 

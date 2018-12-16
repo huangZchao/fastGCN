@@ -111,14 +111,8 @@ def construct_feeddict_forMixlayers(AXfeatures, support, labels, placeholders):
     feed_dict.update({placeholders['num_features_nonzero']: AXfeatures[1].shape})
     return feed_dict
 
+
 def main(rank1):
-
-
-
-    # config = tf.ConfigProto(device_count={"CPU": 4}, # limit to num_cpu_core CPU usage
-    #                 inter_op_parallelism_threads = 1,
-    #                 intra_op_parallelism_threads = 4,
-    #                 log_device_placement=False)
     adj, features, y_train, y_val, y_test,train_index, val_index, test_index = loadRedditFromNPZ("data/")
     adj = adj+adj.T
 
@@ -267,8 +261,9 @@ def transferG2ADJ():
     adj = sp.csr_matrix((np.ones((len(newEdges0),)), (newEdges0, newEdges1)), shape=(numNode, numNode))
     sp.save_npz("reddit_adj.npz", adj)
 
-if __name__=="__main__":
 
-    main(50)
+if __name__=="__main__":
+    adj, features, y_train, y_val, y_test, train_index, val_index, test_index = loadRedditFromNPZ("data/")
+    # main(50)
     # for k in [25, 50, 100, 200, 400]:
     #     main(k)
